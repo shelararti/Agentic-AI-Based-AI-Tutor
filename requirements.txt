@@ -1,0 +1,15 @@
+# core
+fastapi>=0.110
+uvicorn>=0.29
+langgraph>=1.2.0
+pypdf>=4.0
+python-multipart>=0.0.9
+numpy>=1.26
+
+# syllabus tech (all optional: the app falls back gracefully if one is missing)
+litellm>=1.40          # provider-agnostic LLM calls (Unit 4)
+faiss-cpu>=1.8         # vector index for RAG (Unit 2); NumPy cosine is used without it
+langfuse>=2,<3         # LLM observability via LiteLLM's callback (Unit 4); also needs LANGFUSE_* env vars
+
+# only for the tests
+httpx>=0.27
