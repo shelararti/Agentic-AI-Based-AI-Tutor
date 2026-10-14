@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Teacher Assistant</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/style.css?v=9">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand"><span class="brand-mark">T</span><span class="brand-name">Teacher Assistant</span></div>
+  <nav class="modules" role="tablist" aria-label="Modules">
+    <button class="module-tab" role="tab" data-module="teach" type="button">Teach</button>
+    <button class="module-tab" role="tab" data-module="quiz" type="button">Quiz</button>
+    <button class="module-tab" role="tab" data-module="code" type="button">Code</button>
+  </nav>
+  <div class="settings">
+    <label>Level
+      <select id="level-select">
+        <option value="beginner">Beginner</option>
+        <option value="intermediate">Intermediate</option>
+        <option value="advanced">Advanced</option>
+      </select>
+    </label>
+    <label>Language <select id="language-select"></select></label>
+  </div>
+</header>
+
+<div class="shell">
+  <!-- Shared: notes and topic, used by all three modules -->
+  <aside class="sidebar">
+    <section class="side-block">
+      <h2>1 · Notes</h2>
+      <div id="subject-list" class="pick-list"></div>
+      <details class="add-notes">
+        <summary>Add your own notes</summary>
+        <div class="add-body">
+          <label class="lbl">Upload a PDF</label>
+          <input id="pdf-input" type="file" accept="application/pdf">
+          <input id="pdf-title" type="text" placeholder="Name (optional)" spellcheck="false">
+          <button id="pdf-submit" class="btn" type="button">Upload PDF</button>
+          <label class="lbl">Or paste text</label>
+          <input id="notes-title" type="text" placeholder="Name, e.g. Photosynthesis" spellcheck="false">
+          <textarea id="notes-text" rows="5" placeholder="Paste notes here. Put each section heading on its own line."></textarea>
+          <button id="notes-submit" class="btn" type="button">Use these notes</button>
+        </div>
+      </details>
+      <p id="source-status" class="note"></p>
+    </section>
+    <section class="side-block">
+      <h2>2 · Topic</h2>
+      <p id="topic-empty" class="note">Choose notes first.</p>
+      <div id="topic-list" class="pick-list"></div>
+    </section>
+  </aside>
+
+  <main class="main">
+    <div id="no-topic" class="empty">
+      <h1>Pick notes and a topic</h1>
+      <p>Then use <b>Teach</b> to learn by talking with your teacher, <b>Quiz</b> to practise, or <b>Code</b> for hands-on exercises.</p>
+    </div>
+
+    <!-- MODULE 1: TEACH -->
+    <section id="mod-teach" class="module" hidden>
+      <div class="mod-head">
+        <div><h1>Teach</h1><p class="sub">Topic: <b class="topic-name"></b></p></div>
+        <div class="seg" role="tablist" aria-label="Teach mode">
+          <button class="seg-btn" data-mode="chat" type="button">Class chat</button>
+          <button class="seg-btn" data-mode="lesson" type="button">Lesson plan</button>
+          <button class="seg-btn" data-mode="notes" type="button">Ask my notes</button>
+        </div>
+      </div>
+
+      <div id="teach-chat" class="mode">
+        <div id="tutor-log" class="chat-log" role="log" aria-live="polite">
+          <div id="tutor-empty" class="chat-empty">
+            <p>Ask anything about <b class="topic-name"></b> and your teacher will explain, one question at a time.</p>
+            <button id="tutor-start" class="btn btn-primary" type="button">Start the lesson</button>
+          </div>
+        </div>
+        <div id="tutor-chips" class="chips" hidden>
+          <button class="chip" type="button">Explain it more simply</button>
+          <button class="chip" type="button">Give me an example</button>
+          <button class="chip" type="button">Why does that happen?</button>
+          <button class="chip" type="button">Test me with a question</button>
+        </div>
+        <div class="composer">
+          <input id="tutor-input" type="text" maxlength="1000" placeholder="Ask your teacher…" spellcheck="false" disabled>
+          <button id="tutor-send" class="btn btn-primary" type="button" disabled>Send</button>
+        </div>
+      </div>
+
+      <div id="teach-lesson" class="mode" hidden>
+        <p class="sub">A ready-to-teach plan: goals, explanation, worked example, key points and class questions.</p>
+        <button class="btn btn-primary gen-btn" data-kind="teach" type="button">Create lesson plan</button>
+        <div id="out-teach" class="output"></div>
+      </div>
+
+      <div id="teach-notes" class="mode" hidden>
+        <div id="ask-log" class="chat-log" role="log" aria-live="polite">
+          <div class="chat-empty"><p>Ask about the whole subject <b id="ask-subject"></b>. This assistant searches your notes, does arithmetic, and remembers facts about you (try: "remember that my class is Grade 7").</p></div>
+        </div>
+        <div class="composer">
+          <input id="ask-input" type="text" maxlength="1000" placeholder="Ask about your notes…" spellcheck="false">
+          <button id="ask-btn" class="btn btn-primary" type="button">Ask</button>
+        </div>
+        <details class="memory">
+          <summary>Memory (<span id="mem-count">0</span> saved facts)</summary>
+          <ul id="mem-list"></ul>
+          <button id="mem-clear" class="linkish" type="button">Clear memory</button>
+        </details>
+      </div>
+    </section>
+
+    <!-- MODULE 2: QUIZ -->
+    <section id="mod-quiz" class="module" hidden>
+      <div class="mod-head">
+        <div><h1>Quiz</h1><p class="sub">Topic: <b class="topic-name"></b></p></div>
+        <div class="inline-form">
+          <label>Questions
+            <select id="num-questions"><option>3</option><option selected>5</option><option>8</option><option>10</option></select>
+          </label>
+          <button class="btn btn-primary gen-btn" data-kind="quiz" type="button">Create quiz</button>
+        </div>
+      </div>
+      <p class="sub">Pick an answer for each question; you see right away if it is correct.</p>
+      <div id="quiz-score" class="score" hidden></div>
+      <div id="out-quiz" class="output"></div>
+    </section>
+
+    <!-- MODULE 3: CODE -->
+    <section id="mod-code" class="module" hidden>
+      <div class="mod-head">
+        <div><h1>Code</h1><p class="sub">Topic: <b class="topic-name"></b></p></div>
+        <button class="btn btn-primary gen-btn" data-kind="code" type="button">Create exercise</button>
+      </div>
+      <p class="sub">A hands-on exercise with a rubric. Try it first, then reveal the sample solution.</p>
+      <div id="out-code" class="output"></div>
+    </section>
+  </main>
+</div>
+
+<footer class="statusbar">
+  <span id="status-text">ready</span>
+  <span id="sys-text" class="sys-text"></span>
+</footer>
+
+<script src="/static/app.js"></script>
+</body>
+</html>
